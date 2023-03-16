@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.catcov.spring.dao.RepositoryDao;
+import com.catcov.spring.daoimpl.CurrencyDaoImpl;
+import com.catcov.spring.daoimpl.ProductDaoImpl;
+import com.catcov.spring.daoimpl.UserAddressDaoImpl;
+import com.catcov.spring.daoimpl.UserDaoImpl;
 import com.catcov.spring.models.Product;
 import com.catcov.spring.models.SearchEntity;
 import com.catcov.spring.models.User;
@@ -25,9 +29,15 @@ import jakarta.validation.Valid;
 
 @Controller
 public class UserController {
-
+	
 	@Autowired
-	RepositoryDao repositoryDao;
+	ProductDaoImpl productDaoImpl;
+	
+	@Autowired
+	UserAddressDaoImpl userAddressDaoImpl;
+	
+	@Autowired
+	UserDaoImpl userDaoImpl;
 
 	private static final int WEAK_STRENGTH = 1;
 	private static final int FEAR_STRENGTH = 8;
@@ -52,14 +62,14 @@ public class UserController {
 		}
 
 		session.setAttribute("userEmail", user.getEmail());
-		int checker = repositoryDao.checkUser(user.getLogin(), user.getPass());
+		int checker = userDaoImpl.checkUser(user.getLogin(), user.getPass());
 		if (checker > 0) {
 			return "registration_error";
 		} else {
 			System.out.println(user.getLogin() + ", " + user.getPass() + ", " + user.getEmail() + ", " + user.getFirstName() + ", " + user.getLastName());
-			repositoryDao.saveUser(user.getLogin(), user.getPass(), user.getEmail(), user.getFirstName(),
+			userDaoImpl.saveUser(user.getLogin(), user.getPass(), user.getEmail(), user.getFirstName(),
 					user.getLastName());
-			repositoryDao.saveUserAdress(userAddress.getCountry(), userAddress.getCity(), userAddress.getStreet(),
+			userAddressDaoImpl.saveUserAdress(userAddress.getCountry(), userAddress.getCity(), userAddress.getStreet(),
 					userAddress.getZipCode(), user.getEmail());
 			return "success_registration";
 
@@ -70,10 +80,10 @@ public class UserController {
 	@GetMapping("/userCabinet")
 	public String userCabinet(Model model, User user, UserAddress userAddress, HttpSession session) {
 		String login = (String) session.getAttribute("userLogin");
-		String email = repositoryDao.getUserEmail(login);
+		String email = userDaoImpl.getUserEmail(login);
 		System.out.println("userCabinet login and email - " + login + " " + email);
-		model.addAttribute("userInfo", repositoryDao.getUserInfo(email));
-		model.addAttribute("userAddress", repositoryDao.getUserAddress(email));
+		model.addAttribute("userInfo", userDaoImpl.getUserInfo(email));
+		model.addAttribute("userAddress", userAddressDaoImpl.getUserAddress(email));
 		return "userCabinet";
 	}
 
@@ -105,11 +115,11 @@ public class UserController {
 	@PostMapping("successeful_changed_userInfo")
 	public String changedInfo(Model model, UserAddress userAddress, User user, HttpSession session) {
 		String login = (String) session.getAttribute("userLogin");
-		String email = repositoryDao.getUserEmail(login);
+		String email = userDaoImpl.getUserEmail(login);
 		System.out.println("userInfo - " + email);
 		model.addAttribute("firstName", user.getFirstName());
 		model.addAttribute("lastName", user.getLastName());
-		repositoryDao.updateUser(user.getFirstName(), user.getLastName(), email);
+		userDaoImpl.updateUser(user.getFirstName(), user.getLastName(), email);
 		return "redirect:/successeful_changed";
 	}
 
@@ -117,13 +127,13 @@ public class UserController {
 	@PostMapping("successeful_changed_address")
 	public String changedAddress(Model model, UserAddress userAddress, User user, HttpSession session) {
 		String login = (String) session.getAttribute("userLogin");
-		String email = repositoryDao.getUserEmail(login);
+		String email = userDaoImpl.getUserEmail(login);
 		System.out.println("userAddress - " + email);
 		model.addAttribute("country", userAddress.getCountry());
 		model.addAttribute("city", userAddress.getCity());
 		model.addAttribute("street", userAddress.getStreet());
 		model.addAttribute("zipCode", userAddress.getZipCode());
-		repositoryDao.updateUserAddress(userAddress.getCountry(), userAddress.getCity(), userAddress.getStreet(),
+		userAddressDaoImpl.updateUserAddress(userAddress.getCountry(), userAddress.getCity(), userAddress.getStreet(),
 				userAddress.getZipCode(), email);
 		return "redirect:/successeful_changed";
 	}
@@ -132,13 +142,13 @@ public class UserController {
 	@PostMapping("successeful_added_address")
 	public String addAddress(Model model, UserAddress userAddress, User user, HttpSession session) {
 		String login = (String) session.getAttribute("userLogin");
-		String email = repositoryDao.getUserEmail(login);
+		String email = userDaoImpl.getUserEmail(login);
 		System.out.println("addUserAddress - " + email);
 		model.addAttribute("country", userAddress.getCountry());
 		model.addAttribute("city", userAddress.getCity());
 		model.addAttribute("street", userAddress.getStreet());
 		model.addAttribute("zipCode", userAddress.getZipCode());
-		repositoryDao.saveUserAdress(userAddress.getCountry(), userAddress.getCity(), userAddress.getStreet(),
+		userAddressDaoImpl.saveUserAdress(userAddress.getCountry(), userAddress.getCity(), userAddress.getStreet(),
 				userAddress.getZipCode(), email);
 		return "redirect:/successeful_changed";
 	}
@@ -154,27 +164,6 @@ public class UserController {
 			return "Strong";
 		}
 		return "";
-	}
-
-	@PostMapping("/findProduct")
-	public String dropDownBoxWithSearch(@ModelAttribute("searchEntity") SearchEntity searchEntity, Model model) {
-		model.addAttribute("searchTitle", searchEntity.getSearchTitle());
-		return "products";
-	}
-
-	@GetMapping(path = "/findProducts", consumes = { "application/json; charset=UTF-8" }, produces = {
-			"application/json; charset=UTF-8" })
-	public @ResponseBody List<Product> findProduct(@RequestParam(value = "temp", required = false, defaultValue = "") String temp, HttpSession session) {
-		List<Product> res = new ArrayList<>();
-		try {
-			int id = Integer.parseInt(temp);
-			res = repositoryDao.findProductByIdOrName(id, (String) session.getAttribute("currency"));
-		} catch (Exception e) {
-			res = repositoryDao.findProductByIdOrName(temp, (String) session.getAttribute("currency"));
-
-		}
-
-		return res;
 	}
 
 }

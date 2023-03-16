@@ -7,7 +7,12 @@
 <title>Registration Error</title>
 </head>
 <body>
-<p>Registration Error</p>
+<div align="center">
+<h1>Registration Error</h1>
+<h4>Please try again!</h4>
+<h4><a href="http://localhost:8080/web-market/">Back to main</a></h4>
+</div>
+
 
 </body>
 </html>

@@ -17,13 +17,19 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.catcov.spring.dao.RepositoryDao;
-import com.catcov.spring.models.Page;
+import com.catcov.spring.daoimpl.CurrencyDaoImpl;
+import com.catcov.spring.daoimpl.ProductDaoImpl;
+import com.catcov.spring.daoimpl.TestDaoImpl;
+import com.catcov.spring.daoimpl.UserAddressDaoImpl;
+import com.catcov.spring.daoimpl.UserDaoImpl;
 import com.catcov.spring.models.Product;
 import com.catcov.spring.models.SearchEntity;
 import com.catcov.spring.models.User;
@@ -36,11 +42,14 @@ import jakarta.validation.Valid;
 public class ProductController {
 
 	@Autowired
-	RepositoryDao repositoryDao;
+	ProductDaoImpl productDaoImpl;
+
+	@Autowired
+	UserDaoImpl userDaoImpl;
 
 	@Autowired
 	SessionService sessionService;
-	
+
 	@Autowired
 	ProductService productService;
 
@@ -59,11 +68,11 @@ public class ProductController {
 		try {
 			int id = Integer.parseInt(searchEntity.getSearchTitle());
 			model.addAttribute("products",
-					repositoryDao.findProductByIdOrName(id, (String) session.getAttribute("currency")));
+					productDaoImpl.findProductByIdOrName(id, (String) session.getAttribute("currency")));
 
 		} catch (Exception e) {
-			model.addAttribute("products",
-					repositoryDao.findProductByIdOrName(searchEntity.getSearchTitle(), (String) session.getAttribute("currency")));
+			model.addAttribute("products", productDaoImpl.findProductByIdOrName(searchEntity.getSearchTitle(),
+					(String) session.getAttribute("currency")));
 
 		}
 		return "searchProducts";
@@ -72,11 +81,10 @@ public class ProductController {
 	// product
 	// test
 	@RequestMapping(value = "/getStudentPhoto/{id}")
-	public void getStudentPhoto(HttpServletResponse response, @PathVariable("id") int id)
-			throws Exception {
+	public void getStudentPhoto(HttpServletResponse response, @PathVariable("id") int id) throws Exception {
 		response.setContentType("image/jpg");
 
-		Blob ph = repositoryDao.getPhotoById(id);
+		Blob ph = productDaoImpl.getPhotoById(id);
 
 		byte[] bytes = ph.getBytes(1, (int) ph.length());
 		InputStream inputStream = new ByteArrayInputStream(bytes);
@@ -86,7 +94,7 @@ public class ProductController {
 	// product
 	@GetMapping(value = "/product_info", params = "id")
 	public String getProductInfo(@RequestParam("id") int id, Model model) {
-		model.addAttribute("products", repositoryDao.getProductInfo(id));
+		model.addAttribute("products", productDaoImpl.getProductInfo(id));
 		return "productInfo";
 	}
 
@@ -99,27 +107,28 @@ public class ProductController {
 		}
 
 		if (product.getCurrency() == null || product.getCurrency().isEmpty()) {
-			product.setCurrency("leu");}
+			product.setCurrency("leu");
+		}
 //		 else {
 //		}
 
 		System.out.println("Products Page Requested POST");
-		
+
 		model.addAttribute("cartQuantity", session.getAttribute("cartQuantity"));
 		model.addAttribute("Login", user.getLogin());
 		model.addAttribute("Pass", user.getPass());
-		model.addAttribute("products", repositoryDao.getProductsListNew(size, page, product.getCurrency()));
+		model.addAttribute("products", productDaoImpl.getProductsListNew(size, page, product.getCurrency()));
 		model.addAttribute("pages", productService.getPages(size));
 		// !!!
 		sessionService.setProduct("specialProduct",
-				repositoryDao.getProductsListNew(size, page, product.getCurrency()));
+				productDaoImpl.getProductsListNew(size, page, product.getCurrency()));
 		session.setAttribute("currency", product.getCurrency());
 		session.setAttribute("productId", product.getId());
 		if (user.getLogin() == null && user.getPass() == null) {
 			user.setLogin((String) session.getAttribute("userLogin"));
 			user.setPass((String) session.getAttribute("userPass"));
 		}
-		int checker = repositoryDao.checkUser(user.getLogin(), user.getPass());
+		int checker = userDaoImpl.checkUser(user.getLogin(), user.getPass());
 		System.out.println(user.getLogin() + ", " + user.getPass());
 		if (checker > 0) {
 			session.setAttribute("userLogin", user.getLogin());
@@ -132,7 +141,7 @@ public class ProductController {
 
 	// product
 	@GetMapping(value = "/products", params = { "size", "page" })
-	public String getProductsByPageNumber(Model model, @ModelAttribute("product") Product product, 
+	public String getProductsByPageNumber(Model model, @ModelAttribute("product") Product product,
 			@RequestParam("size") int size, @RequestParam("page") int page, HttpSession session) {
 		product.setCurrency((String) session.getAttribute("currency"));
 		System.out.println("Products Page Requested GET");
@@ -140,26 +149,39 @@ public class ProductController {
 		System.out.println("size of page is " + size);
 		if (product.getCurrency() == null || product.getCurrency().isEmpty()) {
 			product.setCurrency("leu");
-		} 
+		}
 //		else {
 //		}
 
 		model.addAttribute("cartQuantity", session.getAttribute("cartQuantity"));
-		model.addAttribute("products", repositoryDao.getProductsListNew(size, page, product.getCurrency()));
+		model.addAttribute("products", productDaoImpl.getProductsListNew(size, page, product.getCurrency()));
 		model.addAttribute("pages", productService.getPages(size));
 		// !!!
-		session.setAttribute("specialProduct", repositoryDao.getProductsListNew(size, page, product.getCurrency()));
+		session.setAttribute("specialProduct", productDaoImpl.getProductsListNew(size, page, product.getCurrency()));
 		session.setAttribute("productId", product.getId());
 
 		return "products";
 	}
+	
+	@PostMapping("/findProduct")
+	public String dropDownBoxWithSearch(@ModelAttribute("searchEntity") SearchEntity searchEntity, Model model) {
+		model.addAttribute("searchTitle", searchEntity.getSearchTitle());
+		return "products";
+	}
 
-	// product
-	@GetMapping({ "purchase", "shopping_cart/purchase" })
-	public String purchase(HttpSession session) {
-		session.removeAttribute("cart");
-		session.removeAttribute("cartQuantity");
-		return "purchase";
+	@GetMapping(path = "/findProducts", consumes = { "application/json; charset=UTF-8" }, produces = {
+			"application/json; charset=UTF-8" })
+	public @ResponseBody List<Product> findProduct(@RequestParam(value = "temp", required = false, defaultValue = "") String temp, HttpSession session) {
+		List<Product> res = new ArrayList<>();
+		try {
+			int id = Integer.parseInt(temp);
+			res = productDaoImpl.findProductByIdOrName(id, (String) session.getAttribute("currency"));
+		} catch (Exception e) {
+			res = productDaoImpl.findProductByIdOrName(temp, (String) session.getAttribute("currency"));
+
+		}
+
+		return res;
 	}
 
 }

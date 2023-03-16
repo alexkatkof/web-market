@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.catcov.spring.dao.RepositoryDao;
+import com.catcov.spring.daoimpl.CurrencyDaoImpl;
+import com.catcov.spring.daoimpl.ProductDaoImpl;
+import com.catcov.spring.daoimpl.UserAddressDaoImpl;
+import com.catcov.spring.daoimpl.UserDaoImpl;
 import com.catcov.spring.models.Product;
 import com.catcov.spring.models.ProductItem;
 import com.catcov.spring.service.SessionService;
@@ -21,9 +25,9 @@ import com.catcov.spring.service.ShoppingCartService;
 
 @Controller
 public class ShoppingCartController {
-	
+
 	@Autowired
-	RepositoryDao repositoryDao;
+	ProductDaoImpl productDaoImpl;
 
 	@Autowired
 	SessionService sessionService;
@@ -37,7 +41,7 @@ public class ShoppingCartController {
 			System.out.println("shoppingCart" + id);
 			List<ProductItem> items = new ArrayList<>();
 			String currency = (String) session.getAttribute("currency");
-			List<Product> products = repositoryDao.getItem(id, currency);
+			List<Product> products = productDaoImpl.getItem(id, currency);
 
 			if (id == null) {
 				return "shopping_cart";
@@ -71,6 +75,14 @@ public class ShoppingCartController {
 			session.setAttribute("cartQuantity", x);
 
 			return "shopping_cart";
+		}
+		
+		// product
+		@GetMapping({ "purchase", "shopping_cart/purchase" })
+		public String purchase(HttpSession session) {
+			session.removeAttribute("cart");
+			session.removeAttribute("cartQuantity");
+			return "purchase";
 		}
 	
 
