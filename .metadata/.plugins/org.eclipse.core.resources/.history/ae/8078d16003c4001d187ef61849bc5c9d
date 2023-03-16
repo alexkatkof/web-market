@@ -54,6 +54,7 @@ public class ShoppingCartController {
 				items.add(new ProductItem(product1, 1));
 				session.setAttribute("cart", items);
 			} else {
+				/** List<ProductItem> cart */
 				items = (List<ProductItem>) session.getAttribute("cart");
 				int index = shoppingCartService.exists(intId, items);
 				if (index == -1) {

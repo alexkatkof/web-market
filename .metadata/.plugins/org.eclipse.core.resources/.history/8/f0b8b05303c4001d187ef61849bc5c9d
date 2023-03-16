@@ -54,6 +54,7 @@ public class ProductController {
 	ProductService productService;
 
 	// product
+	// test
 	@RequestMapping(value = "searchProduct", method = RequestMethod.POST)
 	public String findProduct(SearchEntity searchEntity, RedirectAttributes redirectAttributes) {
 		redirectAttributes.addFlashAttribute("searchEntity", searchEntity);
@@ -61,6 +62,7 @@ public class ProductController {
 	}
 
 	// product
+	// test
 	@RequestMapping(value = "searchSuccess", method = RequestMethod.GET)
 	public String newSearch(SearchEntity searchEntity, Model model, HttpSession session) {
 		try {
@@ -107,6 +109,8 @@ public class ProductController {
 		if (product.getCurrency() == null || product.getCurrency().isEmpty()) {
 			product.setCurrency("leu");
 		}
+//		 else {
+//		}
 
 		System.out.println("Products Page Requested POST");
 
@@ -115,7 +119,7 @@ public class ProductController {
 		model.addAttribute("Pass", user.getPass());
 		model.addAttribute("products", productDaoImpl.getProductsListNew(size, page, product.getCurrency()));
 		model.addAttribute("pages", productService.getPages(size));
-
+		// !!!
 		sessionService.setProduct("specialProduct",
 				productDaoImpl.getProductsListNew(size, page, product.getCurrency()));
 		session.setAttribute("currency", product.getCurrency());
@@ -146,11 +150,13 @@ public class ProductController {
 		if (product.getCurrency() == null || product.getCurrency().isEmpty()) {
 			product.setCurrency("leu");
 		}
+//		else {
+//		}
 
 		model.addAttribute("cartQuantity", session.getAttribute("cartQuantity"));
 		model.addAttribute("products", productDaoImpl.getProductsListNew(size, page, product.getCurrency()));
 		model.addAttribute("pages", productService.getPages(size));
-
+		// !!!
 		session.setAttribute("specialProduct", productDaoImpl.getProductsListNew(size, page, product.getCurrency()));
 		session.setAttribute("productId", product.getId());
 
