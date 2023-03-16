@@ -1,0 +1,101 @@
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Home</title>
+<link href="resources/static/css/navbar.css" rel="stylesheet" type="text/css"/>
+
+<style type="text/css">
+@font-face {
+   font-family: myFirstFont;
+   src: url(sansation_light.woff);
+}
+
+* {
+   font-family: myFirstFont;
+}
+</style>
+
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript">
+$(function doAjax1() {
+	$("#searchInput").autocomplete({
+		source: 'findProducts',
+		minlength: 3
+	});
+});
+</script>
+
+<script type="text/javascript">
+function doAjax2() {
+	$.ajax({
+		url : 'findProducts',
+		type : 'GET',
+		data : ({
+			password : $('.pass').val()
+		}),
+		contentType : 'application/json',
+		success : function(data) {
+			$('#strengthValue').html(data);
+		},
+		error : function(response) {
+			$('#strengthValue').html(response.responseText);
+		}
+	})
+}
+
+</script>
+
+<script type="text/javascript">
+function doAjax() {
+		$.ajax({
+			url: 'http://localhost:8080/web-market/findProducts',
+			type : 'GET',
+			dataType: "json",
+			data: {temp: $("#searchInput").val() },
+			success: function(data, response) {
+ 				$('#result').html(data);
+// 				response($.map(data, function(item) {
+// 					return {label: item.title, value: item.title};
+// 				}));
+			},
+			error: function (response) {
+				alert("Error");
+				$('#result').html(response.responseJson);
+			}
+		});
+}
+
+
+</script>
+
+</head>
+<body>
+
+	<div align="center">
+		<form action="products?size=10&page=1" method="post">
+<!-- 			<input type="text" name="searchInput" onkeyup="doAjax()"> <br> -->
+<!-- 			<span id="result">1</span>  -->
+			<input type="text" name="Login"> <br>
+			<input type="password" name="Pass"> <br> <input
+				type="submit" value="Login" />
+		</form>
+	</div>
+
+	<div align="center">
+		<a href="registration_form">Registration</a>
+	</div>
+	
+		<div align="center">
+		<a href="test">Test</a>
+	</div>
+
+</body>
+</html>

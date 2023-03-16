@@ -1,0 +1,10 @@
+127.0.0.1 - - [02/Aug/2022:19:24:51 +0200] "GET / HTTP/1.1" 404 771
+0:0:0:0:0:0:0:1 - - [02/Aug/2022:19:24:57 +0200] "GET /web-market/ HTTP/1.1" 200 496
+0:0:0:0:0:0:0:1 - - [02/Aug/2022:19:24:57 +0200] "GET /favicon.ico HTTP/1.1" 404 782
+0:0:0:0:0:0:0:1 - - [02/Aug/2022:19:25:02 +0200] "POST /web-market/products?size=10&pageNumber=1 HTTP/1.1" 200 142
+0:0:0:0:0:0:0:1 - - [02/Aug/2022:19:25:07 +0200] "GET /web-market/registration_form HTTP/1.1" 200 582
+0:0:0:0:0:0:0:1 - - [02/Aug/2022:19:25:12 +0200] "POST /web-market/success_registration HTTP/1.1" 200 204
+0:0:0:0:0:0:0:1 - - [02/Aug/2022:19:25:17 +0200] "GET / HTTP/1.1" 404 771
+0:0:0:0:0:0:0:1 - - [02/Aug/2022:19:26:05 +0200] "GET /web-market/registration_form HTTP/1.1" 200 582
+0:0:0:0:0:0:0:1 - - [02/Aug/2022:19:26:10 +0200] "POST /web-market/success_registration HTTP/1.1" 200 236
+0:0:0:0:0:0:0:1 - - [02/Aug/2022:19:26:12 +0200] "GET /web-market/ HTTP/1.1" 200 496

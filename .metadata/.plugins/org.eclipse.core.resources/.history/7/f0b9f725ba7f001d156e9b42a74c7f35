@@ -1,0 +1,22 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Please edit your profile</title>
+</head>
+<body>
+
+<h2 align="center">Please edit your profile!</h2>
+
+<div align="center">
+		<form action="http://localhost:8080/web-market/successeful_changed_userInfo" method="post">
+			<input type="text" name="firstName"> <br> 
+			<input type="text" name="lastName"> <br> 
+			<input type="submit" value="Submit">
+		</form>
+	</div>
+
+</body>
+</html>

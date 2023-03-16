@@ -1,0 +1,6 @@
+1661429196463	Encapsulate field 'title'
+1661429227407	Encapsulate field 'id'
+1661429310301	Encapsulate field 'leu'
+1661429318694	Encapsulate field 'usd'
+1661429322999	Encapsulate field 'euro'
+1661717603338	Rename type 'Price'

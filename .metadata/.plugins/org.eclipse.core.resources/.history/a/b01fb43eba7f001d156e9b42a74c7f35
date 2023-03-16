@@ -1,0 +1,23 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Add Address</title>
+</head>
+<body>
+<h2 align="center">Please add address!</h2>
+
+<div align="center">
+		<form action="http://localhost:8080/web-market/successeful_added_address" method="post">
+			<input type="text" name="country">Country: <br> 
+			<input type="text" name="city">City: <br> 
+			<input type="text" name="street">Street: <br> 
+			<input type="text" name="zipCode">Zip Code: <br> 
+			<input type="submit" value="Submit">
+		</form>
+	</div>
+
+</body>
+</html>

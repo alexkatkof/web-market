@@ -1,0 +1,10 @@
+1655757739747	Rename resource 'registration.jsp'
+1655758522519	Rename resource 'succes_registration.jsp'
+1655915594834	Rename package 'com.catcov.spring.dao'
+1655915731639	Rename package 'com.catcov.spring.dao.impl'
+1656063879855	Delete element
+1656063904711	Rename type 'UserDao'
+1656076811249	Rename type 'TestDao'
+1656077214839	Rename type 'DataBaseService'
+1656077456425	Delete element
+1656078289408	Move compilation unit

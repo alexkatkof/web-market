@@ -1,0 +1,160 @@
+package com.catcov.spring.dao;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+
+import com.catcov.spring.models.Currency;
+import com.catcov.spring.models.Product;
+import com.catcov.spring.models.User;
+import com.catcov.spring.models.UserAddress;
+import com.catcov.spring.service.ProductMapper;
+
+
+public class RepositoryDao implements UserDao{
+	
+	@Autowired
+	JdbcTemplate template;    
+    
+	public void setTemplate(JdbcTemplate template) {    
+	    this.template = template;    
+	} 
+	
+	public int saveUserAdress(String country, String city, String street, String zipCode, String userEmail) {
+		String query = "insert into useradress (country, city, street, zipCode, userEmail) values ('" + country + "', '" + city + "', '" + street + "', '" + zipCode + "', '" + userEmail + "');";
+		return template.update(query);
+	}
+	
+	
+	public int saveUser(String login, String pass, String email, String firstName, String lastName) {
+		String query = "insert into users (login, password, email, firstName, lastName) values ('" + login + "', '" + pass + "', '" + email + "', '" + firstName + "', '" + lastName + "');";
+		return template.update(query);
+	}
+	
+	public int checkUser(String login, String password) {
+		//String query = "SELECT Count(*) FROM users WHERE login='" + log + "' AND password='" + pas + "'";
+		int amount = template.queryForObject(
+			    "select count(*) from users where login='" + login + "' and password='" + password + "'", Integer.class);
+		//int count = Integer.parseInt(amount);
+		return amount;
+	}
+	
+	public int getAmountProducts(){  
+		System.out.println("getAmountProducts");
+		int amount = template.queryForObject("select count(*) from products", Integer.class);
+		return amount;
+    }
+	
+	public List<Product> getProductsList(int size, int pageNumber){ 
+		System.out.println("getProductList");
+		System.out.println("size is " + size);
+		System.out.println("pageNumber is " + pageNumber);
+		int begin = 0 + ((pageNumber - 1) *  size);
+		System.out.println("begin is " + begin);
+		int end =  size + ((pageNumber - 1) *  size);
+		System.out.println("end is " + end);
+		 
+		return template.query("select * from products " + " where id between  " + begin + " and " + end ,new RowMapper<Product>(){  
+			   public Product mapRow(ResultSet rs, int row) throws SQLException {  
+			          Product e= new Product();  
+			          e.setId(rs.getInt(1));  
+			          e.setTitle(rs.getString(2));
+			          return e;  
+			}       
+		}); 
+	}
+	
+	public List<Product> getProductsListNew(int size, int pageNumber, String currency){ 
+		System.out.println("getProductList");
+		System.out.println("size is " + size);
+		System.out.println("pageNumber is " + pageNumber);
+		int begin = 0 + ((pageNumber - 1) *  size);
+		System.out.println("begin is " + begin);
+		int end =  size + ((pageNumber - 1) *  size);
+		System.out.println("end is " + end);
+		//System.out.println("select products.id, products.title, prices." + currency + " from products inner join prices on products.id=prices.id  where products.id and prices.id between " + begin + " and " + end);
+		return template.query("select products.id, products.title, prices." + currency + " from products inner join prices on products.id=prices.id  where products.id and prices.id between " + begin + " and " + end ,new RowMapper<Product>(){  
+			   public Product mapRow(ResultSet rs, int row) throws SQLException {  
+			          Product e= new Product();  
+			          e.setId(rs.getInt(1));  
+			          e.setTitle(rs.getString(2));
+			          e.setPrice(rs.getDouble(3));
+			          return e;  
+			}       
+		}); 
+	}
+	
+	public List<Currency> getPricesList(String currency, int size, int pageNumber){ 
+		System.out.println("getPricesList");
+		System.out.println("size is " + size);
+		System.out.println("pageNumber is " + pageNumber);
+		int begin = 0 + ((pageNumber - 1) *  size);
+		System.out.println("begin is " + begin);
+		int end =  size + ((pageNumber - 1) *  size);
+		System.out.println("end is " + end);
+		 
+		return template.query("select " + currency + "  from prices " + " where id between  " + begin + " and " + end ,new RowMapper<Currency>(){  
+			   public Currency mapRow(ResultSet rs, int row) throws SQLException {  
+				   Currency e= new Currency(); 
+			          e.setPrice(rs.getDouble(1));  
+			          return e;  
+			}       
+		}); 
+	}
+
+	
+	public List<Product> getProducts(){  
+		System.out.println("getProducts");
+	    return template.query("select * from products",new RowMapper<Product>(){  
+	        public Product mapRow(ResultSet rs, int row) throws SQLException {  
+	            Product e= new Product();  
+	            e.setId(rs.getInt(1));  
+	            e.setTitle(rs.getString(2));    
+	            return e;  
+	        } 
+	        
+	    }); 
+	} 
+	
+	public List<User> getUserInfo(String email){
+		return template.query("select firstName, lastName, email from users where users.email='"+email+"';", new RowMapper<User>(){
+			public User mapRow(ResultSet rs, int row) throws SQLException {
+				User e = new User();
+				e.setFirstName(rs.getString(1));
+				e.setLastName(rs.getString(2));
+				e.setEmail(rs.getString(3));
+				return e;
+			}
+		});
+	}
+	
+	public List<UserAddress> getUserAddress(String email){
+		return template.query("select country, city, street, zipCode from useradress where useradress.userEmail='"+email+"';", new RowMapper<UserAddress>(){
+		public UserAddress mapRow(ResultSet rs, int row) throws SQLException {
+			UserAddress e = new UserAddress();
+			e.setCountry(rs.getString(1));
+			e.setCity(rs.getString(2));
+			e.setStreet(rs.getString(3));
+			e.setZipCode(rs.getString(4));
+			return e;
+		}
+	});
+}
+	
+	public String getUserEmail(String login){
+		String sql = "select email from users where users.login= ?";
+		return template.queryForObject(sql, new Object[]{login}, String.class);
+		}
+	
+	
+	
+	public List<Product> getItem(String id, String currency) {
+		String sql = "select products.id, products.title, prices." + currency + " from products inner join prices where products.id = '" + id + "' and prices.id = '" + id + "';";
+		List<Product> listProduct = template.query(sql, new ProductMapper());
+		return listProduct;
+	}
+}

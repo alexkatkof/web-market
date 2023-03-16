@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename type &apos;com.catcov.spring.daoimpl.TestDao&apos; to &apos;TestDaoImpl&apos;&#x0D;&#x0A;- Original project: &apos;web-market&apos;&#x0D;&#x0A;- Original element: &apos;com.catcov.spring.daoimpl.TestDao&apos;&#x0D;&#x0A;- Renamed element: &apos;com.catcov.spring.daoimpl.TestDaoImpl&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Rename similarly named elements&#x0D;&#x0A;- Update textual occurrences in comments and strings" description="Rename type &apos;TestDao&apos;" flags="589830" id="org.eclipse.jdt.ui.rename.type" input="/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.catcov.spring.daoimpl{TestDao.java[TestDao" matchStrategy="1" name="TestDaoImpl" qualified="false" references="true" similarDeclarations="true" stamp="1673882579456" textual="false" version="1.0"/>
+</session>

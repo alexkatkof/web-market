@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Encapsulate field &apos;com.catcov.spring.models.Product.currency&apos; in &apos;com.catcov.spring.models.Product&apos;&#x0D;&#x0A;- Original project: &apos;web-market&apos;&#x0D;&#x0A;- Original element: &apos;com.catcov.spring.models.Product.currency&apos;&#x0D;&#x0A;- Getter method name: &apos;getCurrency&apos;&#x0D;&#x0A;- Setter method name: &apos;setCurrency&apos;&#x0D;&#x0A;- Field visibility: &apos;public&apos;&#x0D;&#x0A;- Use getter and setter methods in declaring type" comments="false" declaring="true" description="Encapsulate field &apos;currency&apos;" flags="589830" getter="getCurrency" id="org.eclipse.jdt.ui.self.encapsulate" input="/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.catcov.spring.models{Product.java[Product^currency" insertion="5" setter="setCurrency" stamp="1669575286264" version="1.0" visibility="1"/>
+</session>

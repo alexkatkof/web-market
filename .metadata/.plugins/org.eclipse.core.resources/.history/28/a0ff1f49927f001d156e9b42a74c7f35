@@ -1,0 +1,316 @@
+package com.catcov.spring.controllers;
+
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.SessionAttributes;
+
+import com.catcov.spring.dao.RepositoryDao;
+import com.catcov.spring.models.Page;
+import com.catcov.spring.models.Product;
+import com.catcov.spring.models.ProductItem;
+import com.catcov.spring.models.User;
+import com.catcov.spring.models.UserAddress;
+import com.catcov.spring.service.SessionService;
+
+@Controller
+//@SessionAttributes("currency")
+public class HomeController {
+
+	@Autowired
+	RepositoryDao repositoryDao;
+	
+	@Autowired
+	SessionService sessionService;
+
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String home(Locale locale, Model model) {
+		System.out.println("Home Page Requested");
+		Date date = new Date();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+		String formattedDate = dateFormat.format(date);
+		model.addAttribute("serverTime", formattedDate);
+		return "index";
+	}
+
+	@RequestMapping(value = "/products",  params = {"size", "page"} ,  method = RequestMethod.POST)
+	public String product( @RequestParam("size") int size, @RequestParam("page") int page,  Model model,
+			@Validated User user, HttpSession session, @ModelAttribute("product")Product product) {
+		System.out.println("1POST Currency is - " + product.getCurrency());
+		if(product.getCurrency() == null || product.getCurrency().isEmpty()) {
+			product.setCurrency("leu");
+			System.out.println("2POST Currency is - " + product.getCurrency());
+		} else {
+			System.out.println("3POST Currency is - " + product.getCurrency());
+		}
+		
+		System.out.println("Products Page Requested POST");
+		model.addAttribute("Login", user.getLogin());
+		model.addAttribute("Pass", user.getPass());
+		model.addAttribute("products", repositoryDao.getProductsListNew(size, page, product.getCurrency()));
+		model.addAttribute("pages", getPages(size));
+		//!!!
+		sessionService.setProduct("specialProduct", repositoryDao.getProductsListNew(size, page, product.getCurrency())); //setAttribute("specialProduct", repositoryDao.getProductsListNew(size, page, product.getCurrency()));
+		session.setAttribute("currency", product.getCurrency());
+		session.setAttribute("productId", product.getId());
+		System.out.println("4POST Currency is - " + product.getCurrency());
+		String currency = product.getCurrency();
+		
+		String login = user.getLogin();
+		String pass = user.getPass();
+		if(user.getLogin() == null && user.getPass() == null) {
+			user.setLogin((String)session.getAttribute("userLogin"));
+			user.setPass((String)session.getAttribute("userPass"));
+		}
+		int checker = repositoryDao.checkUser(user.getLogin(), user.getPass());
+		System.out.println(user.getLogin() + ", " + user.getPass());
+		System.out.println("POST Currency is - " + product.getCurrency());
+		System.out.println("POST Session currency is " + (String)session.getAttribute("currency"));
+		if (checker > 0) {
+			session.setAttribute("userLogin", user.getLogin());
+			session.setAttribute("userPass", user.getPass());
+			return "products";
+		} else {
+			return "sign_in_error";
+		}
+	}
+
+	@GetMapping(value = "/products", params = { "size", "page" })
+	public String getProductsByPageNumber(Model model, @ModelAttribute("product")Product product, @RequestParam("size") int size,
+			@RequestParam("page") int page, HttpSession session) {
+		System.out.println("GET1 Session currency is " + (String)session.getAttribute("currency"));
+		product.setCurrency((String)session.getAttribute("currency"));
+		System.out.println("Products Page Requested GET");
+		System.out.println("page number is " + page );
+		System.out.println("size of page is " + size );
+		System.out.println("User credencial is " + session.getAttribute("userLogin") + " " + session.getAttribute("userPass"));
+		
+		System.out.println("1GET Currency is - " + product.getCurrency());
+		if(product.getCurrency() == null || product.getCurrency().isEmpty()) {
+			product.setCurrency("leu");
+			System.out.println("2GET Currency is - " + product.getCurrency());
+		} else {
+			System.out.println("3GET Currency is - " + product.getCurrency());
+		}
+
+		model.addAttribute("products", repositoryDao.getProductsListNew(size, page, product.getCurrency()));
+		model.addAttribute("pages", getPages(size));
+		//!!!
+		session.setAttribute("specialProduct", repositoryDao.getProductsListNew(size, page, product.getCurrency()));
+		session.setAttribute("productId", product.getId());
+		System.out.println("4GET Currency is - " + product.getCurrency());
+		System.out.println("GET2 Session currency is " + (String)session.getAttribute("currency"));
+	
+
+		return "products";
+	}
+
+	@GetMapping("/registration_form")
+	public String showSignUp(Model model, User user) {
+		System.out.println("Registration form Page Requested");
+		return "registration_form";
+	}
+
+	@PostMapping("/registration")
+	public String registration(Model model, User user, UserAddress userAddress, HttpSession session) {
+		model.addAttribute("Login", user.getLogin());
+		model.addAttribute("Pass", user.getPass());
+		model.addAttribute("Email", user.getEmail());
+		model.addAttribute("FirstName", user.getFirstName());
+		model.addAttribute("LastName", user.getLastName());
+	    
+		model.addAttribute("Country", userAddress.getCountry());
+		model.addAttribute("City", userAddress.getCity());
+		model.addAttribute("Street", userAddress.getStreet());
+		model.addAttribute("zipCode", userAddress.getZipCode());
+		
+		String login = user.getLogin();
+		String pass = user.getPass();
+		String email = user.getEmail();
+		String firstName = user.getFirstName();
+		String lastName = user.getLastName();
+		session.setAttribute("userEmail", user.getEmail());
+		int checker = repositoryDao.checkUser(user.getLogin(), user.getPass());
+		if (checker > 0) {
+			return "registration_error";
+		} else {
+			System.out.println(login + ", " + pass + ", " + email + ", " + firstName + ", " + lastName);
+			repositoryDao.saveUser(user.getLogin(), user.getPass(), user.getEmail(), user.getFirstName(),
+					user.getLastName());
+			repositoryDao.saveUserAdress(userAddress.getCountry(), userAddress.getCity(), userAddress.getStreet(), userAddress.getZipCode(), user.getEmail());
+			return "success_registration";
+
+		}
+	}
+	
+	@GetMapping("/userCabinet")
+	public String userCabinet(Model model, User user, UserAddress userAddress, HttpSession session) {
+		String login = (String)session.getAttribute("userLogin");
+		String email = repositoryDao.getUserEmail(login);
+		System.out.println("userCabinet login and email - " + login + " " + email);
+		model.addAttribute("userInfo", repositoryDao.getUserInfo(email)); 
+		model.addAttribute("userAddress", repositoryDao.getUserAddress(email));
+		return "userCabinet";
+	}
+	
+	//not finished!!!
+	@GetMapping({"/shopping_cart", "/shopping_cart/{id}"})
+	public String shoppingCart(@PathVariable(required = false) String id, HttpSession session, Model model, Product product) {
+		System.out.println("shoppingCart" + id);
+		List<ProductItem> items = new ArrayList<>();
+		//String lastCurrency = (String)session.getAttribute("lastCurrencyWas");
+		String currency = (String)session.getAttribute("currency");
+		List<Product> products = repositoryDao.getItem(id, currency);
+		/**
+		List<Integer> indexes = new ArrayList<>();
+		List<ProductItem> forIndexes = (List<ProductItem>)session.getAttribute("cart");
+		if(lastCurrency == null) {
+			System.out.println("-------lastcurrency == null " + lastCurrency);
+			lastCurrency = currency;
+		} else if(lastCurrency != currency) {
+			//here something wrong!!!!!!!!!!!!!!
+			for(ProductItem item : forIndexes) {
+				indexes.add(item.getProduct().getId());
+				System.out.println(indexes.get(item.getProduct().getId()));
+			}
+			for(Integer index : indexes) {
+				System.out.println("-------lastcurrency != null " + lastCurrency);
+				products = repositoryDao.getItem(index.toString(), currency);
+				Product product1 = products.get(0);
+				int intId1 = Integer.parseInt(id);
+				int index1 = this.exists(intId1, items);
+				if(index1 == -1) {
+					items.add(new ProductItem(find(intId1), 1));
+				} else {
+					int quantity2 = items.get(index1).getQuantity() + 1;
+					items.get(index1).setQuantity(quantity2);
+					session.setAttribute("cart", items);
+				}
+			}
+			session.setAttribute("lastCurrencyWas", currency);
+			return "shopping_cart";
+		}*/
+		
+		if(id == null) {
+			return "shopping_cart";
+		}
+		//List<Product> products = repositoryDao.getItem(id, currency);
+		Product product1 = products.get(0);
+		//session.setAttribute("lastCurrencyWas", currency);
+		System.out.println(products.get(0).getId());
+		System.out.println(products.get(0).getTitle());
+		System.out.println(products.get(0).getPrice());
+		int intId = Integer.parseInt(id);
+		 if(session.getAttribute("cart") == null) { // if cart null, add new product in the cart
+			items.add(new ProductItem(product1, 1));
+			session.setAttribute("cart", items); // save cart in session
+		} else {
+			/**List<ProductItem> cart*/items = (List<ProductItem>)session.getAttribute("cart"); // extract cart in list
+			int index = this.exists(intId, items); // check if cart already have this product
+			if (index == -1) {
+				items.add(new ProductItem(find(intId), 1));// if not, add new product in cart | mojno poprobovati vstaviti product1 vmesto find(intId)
+			} else {
+				int quantity = items.get(index).getQuantity() + 1;// else get quantity of this product and add +1
+				items.get(index).setQuantity(quantity);//set new quantity for this product
+				session.setAttribute("cart", items);// save cart in session
+		}
+		}
+		 
+		return "shopping_cart";
+	}
+	
+	@GetMapping({"purchase", "shopping_cart/purchase"})
+	public String purchase(HttpSession session) {
+		session.removeAttribute("cart");
+		return "purchase";
+	}
+	
+	@GetMapping("editUserAddress")
+	public String editUserAddress(HttpSession session) {
+		
+		return "editUserAddress";
+	}
+	
+	@GetMapping("editUser")
+	public String editUser() {
+		
+		return "editUser";
+	}
+	
+	@PostMapping("successeful_changed_userInfo")//<- try to use this url "successeful_changed_name"
+	public String changedInfo(Model model, UserAddress userAddress, User user, HttpSession session) {
+		String email = (String)session.getAttribute("userEmail");
+		model.addAttribute("firstName", user.getFirstName());
+		model.addAttribute("lastName", user.getLastName());
+		repositoryDao.updateUser(user.getFirstName(), user.getLastName(), email);
+		return "redirect:/successeful_changed";// here use redirect in user_Cabinet, and make same post method for address and make redirect in user_Cabinet, but url will be successeful_changed_address
+	}
+	
+	@PostMapping("successeful_changed_address")
+	public String changedAddress(Model model, UserAddress userAddress, User user, HttpSession session) {
+		String email = (String)session.getAttribute("userEmail");
+		model.addAttribute("country", userAddress.getCountry());
+		model.addAttribute("city", userAddress.getCountry());
+		model.addAttribute("street", userAddress.getCountry());
+		model.addAttribute("zipCode", userAddress.getCountry());
+		return "redirect:/successeful_changed";
+	}
+
+	public List<Page> getPages(int size) {
+		System.out.println("getPages");
+		List<Page> pages = new ArrayList<>();
+		int amountProducts = repositoryDao.getAmountProducts();// количество всех продуктов в базе данных.
+		System.out.println(amountProducts);
+		int countPages = amountProducts / size; // -> количество полных страниц
+		int lastPage = countPages + 1;
+		int rest = amountProducts % size;// -> остаток продуктов на последней не полной странице
+		for (int i = 1; i <= countPages; i++) {
+			pages.add(new Page("/products?size=" + size + "&page=", "" + i));
+		}
+		if (rest != 0) {
+			pages.add(new Page("/products?size=" + size + "&page=", "" + lastPage));
+		}
+		return pages;
+	}
+	
+	//not finished
+	//check if cart have product with this id
+	private int exists(int id, List<ProductItem> cart) {
+		for (int i = 0; i < cart.size(); i++) {
+			if (cart.get(i).getProduct().getId() == id) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	//not finished
+	//find 
+	public Product find(int id) {
+		List<Product> products = sessionService.getProduct("specialProduct");
+		for (Product product : products) {
+			if (product.getId() == id) {
+				return product;
+			}
+		}
+		return null;
+	}
+
+}

@@ -1,0 +1,5 @@
+package com.catcov.spring.service;
+
+public class ShoppingCartService {
+
+}

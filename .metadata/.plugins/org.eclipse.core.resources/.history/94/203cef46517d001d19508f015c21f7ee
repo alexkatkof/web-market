@@ -1,0 +1,78 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %> 
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+</style>
+</head>
+<body>
+
+<div align="right">
+<a href="userCabinet">${userLogin} Cabinet</a>
+</div>
+
+<br/>
+
+<br/>
+
+<h2  align="center">Shopping Cart</h2>
+
+<table>
+  <tr>
+    <th>Id</th>
+    <th>Title</th>
+    <th>Price</th>
+    <th>Quantity</th>
+  </tr>
+   <c:set var="total" value="0"></c:set>
+  <c:forEach var="product" items="${cart}">
+  <c:set var="total"
+				value="${total + product.product.price * product.quantity}"></c:set>
+  <tr>
+    <td>
+    <c:out value="${product.product.id}" />
+    </td>
+    <td>
+    <c:out value="${product.product.title}" />
+    </td>
+    <td>
+     <c:out value="${product.product.price}" />
+    </td>
+    <td>
+         <c:out value="${product.quantity}" />
+    </td>
+  </tr>
+  </c:forEach>
+  <tr>
+			<td align="right">Sum</td>
+			<td>${total}</td>
+		</tr>
+</table>
+
+<br>
+
+
+	<div align="center">
+	<a href="products?size=10&page=1">Back to main</a>
+	</div>
+
+</body>
+</html>
